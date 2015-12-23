@@ -1,9 +1,10 @@
 require 'chunky_png'
 
-DEBUG = false
+DEBUG = true
+VERBOSE = false
 
 # Make sure a file is passed in
-if ARGV.length == 0
+if ARGV.empty?
   raise ArgumentError, 'Missing image to process.'
 end
 
@@ -16,20 +17,18 @@ rescue ChunkyPNG::SignatureMismatch
   abort('File parameter not a PNG file')
 end
 
-all_pixels = {}
-pixel_count = 0
+all_pixels = Hash.new(0)
 
 # Go through each pixel and pull it into a map
 image.pixels.each do |pixel|
-  pixel_count = pixel_count.next
   hex_color = pixel.to_s(16)[0,8]
-  all_pixels[hex_color] = all_pixels[hex_color].to_i.next
+  all_pixels[hex_color] += 1
 end
 
 pixels = all_pixels.to_a.sort_by { |_key, count| count }
 
-puts "Found #{pixel_count} items"
 if DEBUG
+  puts "Found #{image.pixels.length} items"
   print "#{pixels}\n"
 end
 
@@ -39,11 +38,8 @@ PIXEL_SIZE = 16
 # The number of columns in this preview
 NUM_COLS = 4
 
-# Find the number of total rows
-num_rows = all_pixels.keys.length / NUM_COLS
-# And determine the remainder of "pixels" (if any) to see if we add an extra row
-last_row_count = (all_pixels.keys.length - (NUM_COLS * num_rows))
-num_rows = (last_row_count == 0) ? num_rows : num_rows + 1
+# Find the number of total rows and account for remainders
+num_rows = (all_pixels.length.to_f / NUM_COLS).ceil
 
 out_img = ChunkyPNG::Image.new(NUM_COLS * PIXEL_SIZE, num_rows * PIXEL_SIZE,
                                ChunkyPNG::Color::TRANSPARENT)
@@ -56,7 +52,7 @@ pixels.each_with_index do |pixel, index|
   x1 = (index % NUM_COLS + 1) * PIXEL_SIZE
   y0 = (index / NUM_COLS) * PIXEL_SIZE
   y1 = (index / NUM_COLS + 1) * PIXEL_SIZE
-  if DEBUG
+  if VERBOSE
     puts "#{x0} #{y0} #{x1} #{y1} #{pixel[0]}"
   end
   out_img.rect(x0, y0, x1, y1,
