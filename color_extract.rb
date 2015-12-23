@@ -52,9 +52,7 @@ pixels.each_with_index do |pixel, index|
   x1 = (index % NUM_COLS + 1) * PIXEL_SIZE
   y0 = (index / NUM_COLS) * PIXEL_SIZE
   y1 = (index / NUM_COLS + 1) * PIXEL_SIZE
-  if VERBOSE
-    puts "#{x0} #{y0} #{x1} #{y1} #{pixel[0]}"
-  end
+  puts "#{x0} #{y0} #{x1} #{y1} #{pixel[0]}" if VERBOSE
   out_img.rect(x0, y0, x1, y1,
                stroke_color=ChunkyPNG::Color::BLACK, fill_color=color)
 end
