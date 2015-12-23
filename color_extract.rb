@@ -9,8 +9,6 @@ end
 
 filename = ARGV[0]
 
-image = nil
-
 # Practice safe File I/O
 begin
   image = ChunkyPNG::Image.from_file(filename)
@@ -51,7 +49,7 @@ out_img = ChunkyPNG::Image.new(NUM_COLS * PIXEL_SIZE, num_rows * PIXEL_SIZE,
                                ChunkyPNG::Color::TRANSPARENT)
 pixels.each_with_index do |pixel, index|
   color = pixel[0]
-  if color.length != 8
+  unless color.length == 8
     color = ChunkyPNG::Color::TRANSPARENT
   end
   x0 = (index % NUM_COLS) * PIXEL_SIZE
