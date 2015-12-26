@@ -1,4 +1,5 @@
 require 'chunky_png'
+require './paletti.rb'
 
 DEBUG = true
 VERBOSE = false
@@ -8,35 +9,9 @@ if ARGV.empty?
   raise ArgumentError, 'Missing image to process.'
 end
 
-# Do some regex stripping for filenames
-filepath = ARGV[0]
-PNG_DETECTOR = /(.+\/)?([\w_\s\.\-\(\)]+.png)/
-filename = filepath[PNG_DETECTOR, 2]
+image, filename = Paletti.load_png(ARGV[0])
 
-if filename == nil
-  abort('File parameter is empty')
-end
-
-unless File.exist?(filepath)
-  abort('File parameter is not a file')
-end
-
-# Practice safe File I/O
-begin
-  image = ChunkyPNG::Image.from_file(filepath)
-rescue ChunkyPNG::SignatureMismatch
-  abort('File parameter not a PNG file')
-end
-
-all_pixels = Hash.new(0)
-
-# Go through each pixel and pull it into a map
-image.pixels.each do |pixel|
-  hex_color = pixel.to_s(16)[0,8]
-  all_pixels[hex_color] += 1
-end
-
-pixels = all_pixels.to_a.sort_by { |_key, count| count }
+pixels = Paletti.count_pixels(image)
 
 if DEBUG
   puts "Found #{image.pixels.length} items"
@@ -50,7 +25,7 @@ PIXEL_SIZE = 16
 NUM_COLS = 4
 
 # Find the number of total rows and account for remainders
-num_rows = (all_pixels.length.to_f / NUM_COLS).ceil
+num_rows = (pixels.length.to_f / NUM_COLS).ceil
 
 out_img = ChunkyPNG::Image.new(NUM_COLS * PIXEL_SIZE, num_rows * PIXEL_SIZE,
                                ChunkyPNG::Color::TRANSPARENT)
@@ -68,6 +43,6 @@ pixels.each_with_index do |pixel, index|
                stroke_color=ChunkyPNG::Color::BLACK, fill_color=color)
 end
   
-file_out_name = "output_#{filename}"
+file_out_name = "output/p_#{filename}"
 out_img.save(file_out_name)
 puts "Wrote to #{file_out_name}"
