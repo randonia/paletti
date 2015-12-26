@@ -5,6 +5,7 @@ module Paletti
 
   PNG_REGEX = /(.+\/)?([\w_\s\.\-\(\)]+.png)/
 
+  # Load a PNG by path name into a ChunkyPNG::image
   def Paletti.load_png(filepath)
     filename = filepath[PNG_REGEX, 2]
     if filename == nil
@@ -25,6 +26,7 @@ module Paletti
     return image, filename
   end
 
+  # Given a ChunkyPNG::image, count the pixels into a hash
   def Paletti.count_pixels(image)
     all_pixels = Hash.new(0)
     # Go through each pixel and pull it into a map
