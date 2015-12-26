@@ -8,11 +8,22 @@ if ARGV.empty?
   raise ArgumentError, 'Missing image to process.'
 end
 
-filename = ARGV[0]
+# Do some regex stripping for filenames
+filepath = ARGV[0]
+PNG_DETECTOR = /(.+\/)?([\w_\s\.\-\(\)]+.png)/
+filename = filepath[PNG_DETECTOR, 2]
+
+if filename == nil
+  abort('File parameter is empty')
+end
+
+unless File.exist?(filepath)
+  abort('File parameter is not a file')
+end
 
 # Practice safe File I/O
 begin
-  image = ChunkyPNG::Image.from_file(filename)
+  image = ChunkyPNG::Image.from_file(filepath)
 rescue ChunkyPNG::SignatureMismatch
   abort('File parameter not a PNG file')
 end
